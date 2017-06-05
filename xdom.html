@@ -59,13 +59,67 @@
         },
         isClassSelector: function (selector) {
           return selector[0] === '.';
+        },
+        requests: [],
+        fetch: function (argument) {
+          for (var i = 0; i < arguments.length; i++) {
+            var request = new XMLHttpRequest();
+            request.open(arguments[i].type, arguments[i].url);
+            request.send();
+            this.requests.push(request);
+          }
+
+          return this;
+        },
+        success: function(callback) {
+          for (var i = 0; i < this.requests.length; i++) {
+            this.requests[i].addEventListener('load', function(event) {
+              callback({
+                status: event.target.status,
+                data: JSON.parse(event.target.response)
+              });
+            });
+          }
+
+          return this;
+        },
+        error: function(callback) {
+          for (var i = 0; i < this.requests.length; i++) {
+            this.requests[i].addEventListener('error', function(event) {
+              callback({
+                status: event.target.status,
+                data: JSON.parse(event.target.response)
+              });
+            });
+          }
+
+          return this;
         }
+
 
       };
 
-      console.log(XDOM.select('#gameArea'));
-      console.log(XDOM.select('#gameArea .player1 p'));
-      XDOM.select('#gameArea .player1 div').addClass('red');
+      // console.log(XDOM.select('#gameArea'));
+      // console.log(XDOM.select('#gameArea .player1 p'));
+      // XDOM.select('#gameArea .player1 div').addClass('red');
+
+      XDOM.fetch(
+        {
+          'type': 'get',
+          'url': 'https://jsonplaceholder.typicode.com/posts/1',
+          'params': {
+            'ln': 'en'
+          }
+        },
+        {
+         'type': 'get',
+         'url': 'https://jsonplaceholder.typicode.com/posts/2'
+        }
+      ).success(function(data) {
+        console.log('calling success', data);
+      }).error(function(error) {
+        console.log('calling error', error);
+      });
     </script>
   </body>
 </html>
