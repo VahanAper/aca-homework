@@ -3,8 +3,19 @@
   <body>
     <div class="player1">BBBB</div>
     <div id="gameArea">
-        <div class="player1"><p>XXXX</p></div>
-        <div class="player2"></div>
+        <div class="player1">
+          <p>XXXX</p>
+          <p>YYYY</p>
+          <div>
+            <p>divp</p>
+          </div>
+        </div>
+        <div class="player2">
+          <p>2222222</p>
+        </div>
+        <div class="player1">
+          <p>ZZZZ</p>
+        </div>
     </div>
     <script>
       // Tasks
@@ -15,23 +26,59 @@
 
       var XDOM = {
         select: function (selector) {
-          var selectors = selector.split(' '),
-          element = document;
+          var selectors = selector.split(' ');
+
+          var elements = [];
+          var currentElements = document;
 
           for (var i = 0; i < selectors.length; i++) {
             var s = selectors[i];
 
             if (this.isTagSelector(s)) {
-              element = element.getElementsByTagName(s)[0];
+              if (currentElements.length === undefined) {
+                currentElements = currentElements.getElementsByTagName(s);
+              } else {
+                var foundElements = [];
+                for (var j = 0; j < currentElements.length; j++) {
+                  var res = currentElements[j].getElementsByTagName(s);
+                  for (var k = 0; k < res.length; k++) {
+                    foundElements.push(res[k]);
+                  }
+                }
+                currentElements = foundElements;
+              }
+
             } else if (this.isIdSelector(s)) {
-              element = element.getElementById(s.substring(1));
+              if (currentElements.length === undefined) {
+                currentElements = currentElements.getElementById(s.substring(1));
+              } else {
+                var foundElements = [];
+                for (var j = 0; j < currentElements.length; j++) {
+                  foundElements.push(currentElements[j].getElementById(s.substring(1)));
+                }
+                currentElements = foundElements;
+              }
+
             } else if (this.isClassSelector(s)) {
-              element = element.getElementsByClassName(s.substring(1))[0];
+              if (currentElements.length === undefined) {
+                currentElements = currentElements.getElementsByClassName(s.substring(1));
+              } else {
+                var foundElements = [];
+                for (var j = 0; j < currentElements.length; j++) {
+                  var res = currentElements[j].getElementsByClassName(s.substring(1));
+                  for (var c = 0; c < res.length; c++) {
+                    foundElements.push(res[c]);
+                  }
+                }
+                currentElements = foundElements;
+              }
             }
+
+            elements = currentElements;
           }
 
           return {
-            elements: [element],
+            elements: elements,
             addClass: function (className) {
               this.elements.forEach(function (e) {
                 e.className += e.className.length ? (" " + className) : className;
@@ -96,30 +143,31 @@
           return this;
         }
 
-
       };
 
       // console.log(XDOM.select('#gameArea'));
-      // console.log(XDOM.select('#gameArea .player1 p'));
+      console.log(XDOM.select('#gameArea .player1 p'));
       // XDOM.select('#gameArea .player1 div').addClass('red');
 
-      XDOM.fetch(
-        {
-          'type': 'get',
-          'url': 'https://jsonplaceholder.typicode.com/posts/1',
-          'params': {
-            'ln': 'en'
-          }
-        },
-        {
-         'type': 'get',
-         'url': 'https://jsonplaceholder.typicode.com/posts/2'
-        }
-      ).success(function(data) {
-        console.log('calling success', data);
-      }).error(function(error) {
-        console.log('calling error', error);
-      });
+      // console.log('#gameArea .player1 p', XDOM.select('#gameArea .player1 p'));
+
+      // XDOM.fetch(
+      //   {
+      //     'type': 'get',
+      //     'url': 'https://jsonplaceholder.typicode.com/posts/1',
+      //     'params': {
+      //       'ln': 'en'
+      //     }
+      //   },
+      //   {
+      //    'type': 'get',
+      //    'url': 'https://jsonplaceholder.typicode.com/posts/2'
+      //   }
+      // ).success(function(data) {
+      //   console.log('calling success', data);
+      // }).error(function(error) {
+      //   console.log('calling error', error);
+      // });
     </script>
   </body>
 </html>
