@@ -3,11 +3,13 @@
   <body>
     <div class="player1">BBBB</div>
     <div id="gameArea">
-        <div class="player1">
+        <h1 class="player1">hhhh</h1>
+        <span class="inner">SPAN</span>
+        <div class="player1 red blue">
           <p>XXXX</p>
           <p>YYYY</p>
           <div>
-            <p>divp</p>
+            <p class="inner">divp</p>
           </div>
         </div>
         <div class="player2">
@@ -15,6 +17,7 @@
         </div>
         <div class="player1">
           <p>ZZZZ</p>
+          <a class="inner">link</a>
         </div>
     </div>
     <script>
@@ -34,44 +37,71 @@
           for (var i = 0; i < selectors.length; i++) {
             var s = selectors[i];
 
-            if (this.isTagSelector(s)) {
+            var complexSelector = this.isComplexSelector(s);
+
+            if (complexSelector !== false) {
               if (currentElements.length === undefined) {
-                currentElements = currentElements.getElementsByTagName(s);
+                var nodes = currentElements.getElementsByTagName(complexSelector.tag);
+                var foundElements = []
+                for (var j = 0; j < nodes.length; j++) {
+                  if (this.hasAttribute(nodes[j], complexSelector.attribute, complexSelector.value)) {
+                    foundElements.push(nodes[j]);
+                  }
+                }
+                currentElements = foundElements
               } else {
                 var foundElements = [];
                 for (var j = 0; j < currentElements.length; j++) {
-                  var res = currentElements[j].getElementsByTagName(s);
+                  var res = currentElements[j].getElementsByTagName(complexSelector.tag);
                   for (var k = 0; k < res.length; k++) {
-                    foundElements.push(res[k]);
+                    if (this.hasAttribute(res[k], complexSelector.attribute, complexSelector.value)) {
+                      foundElements.push(res[k]);
+                    }
                   }
                 }
                 currentElements = foundElements;
               }
-
-            } else if (this.isIdSelector(s)) {
-              if (currentElements.length === undefined) {
-                currentElements = currentElements.getElementById(s.substring(1));
-              } else {
-                var foundElements = [];
-                for (var j = 0; j < currentElements.length; j++) {
-                  foundElements.push(currentElements[j].getElementById(s.substring(1)));
-                }
-                currentElements = foundElements;
-              }
-
-            } else if (this.isClassSelector(s)) {
-              if (currentElements.length === undefined) {
-                currentElements = currentElements.getElementsByClassName(s.substring(1));
-              } else {
-                var foundElements = [];
-                for (var j = 0; j < currentElements.length; j++) {
-                  var res = currentElements[j].getElementsByClassName(s.substring(1));
-                  for (var c = 0; c < res.length; c++) {
-                    foundElements.push(res[c]);
+            } else {
+              if (this.isTagSelector(s)) {
+                if (currentElements.length === undefined) {
+                  currentElements = currentElements.getElementsByTagName(s);
+                } else {
+                  var foundElements = [];
+                  for (var j = 0; j < currentElements.length; j++) {
+                    var res = currentElements[j].getElementsByTagName(s);
+                    for (var k = 0; k < res.length; k++) {
+                      foundElements.push(res[k]);
+                    }
                   }
+                  currentElements = foundElements;
                 }
-                currentElements = foundElements;
+
+              } else if (this.isIdSelector(s)) {
+                if (currentElements.length === undefined) {
+                  currentElements = currentElements.getElementById(s.substring(1));
+                } else {
+                  var foundElements = [];
+                  for (var j = 0; j < currentElements.length; j++) {
+                    foundElements.push(currentElements[j].getElementById(s.substring(1)));
+                  }
+                  currentElements = foundElements;
+                }
+
+              } else if (this.isClassSelector(s)) {
+                if (currentElements.length === undefined) {
+                  currentElements = currentElements.getElementsByClassName(s.substring(1));
+                } else {
+                  var foundElements = [];
+                  for (var j = 0; j < currentElements.length; j++) {
+                    var res = currentElements[j].getElementsByClassName(s.substring(1));
+                    for (var c = 0; c < res.length; c++) {
+                      foundElements.push(res[c]);
+                    }
+                  }
+                  currentElements = foundElements;
+                }
               }
+
             }
 
             elements = currentElements;
@@ -106,6 +136,49 @@
         },
         isClassSelector: function (selector) {
           return selector[0] === '.';
+        },
+        isComplexSelector: function(selector) {
+          var selectors = selector.split('.');
+          if (selectors.length === 2 && selectors[0] !== '') {
+            return {
+              tag: selectors[0],
+              attribute: '.',
+              value: selectors[1],
+            };
+          } else {
+            var selectors = selector.split('#');
+            if (selectors.length === 2 && selectors[0] !== '') {
+              return {
+                tag: selectors[0],
+                attribute: '#',
+                value: selectors[1],
+              };
+            } else {
+              return false;
+            }
+          }
+        },
+        hasAttribute: function(node, attribute, value) {
+          if (attribute === '.') {
+            return this.hasClass(node, value);
+          }
+          if (attribute === '#') {
+            return this.hasId(node, value);
+          }
+          return false;
+        },
+        hasId: function(node, value) {
+          var id = node.getAttribute('id');
+          return id !== null ? true : false;
+        },
+        hasClass: function(node, className) {
+          var classes = node.getAttribute('class');
+          if (classes !== null) {
+            classesArray = classes.split(' ');
+            return classesArray.includes(className) ? true : false;
+          } else {
+            return false;
+          }
         },
         requests: [],
         fetch: function (argument) {
@@ -146,10 +219,11 @@
       };
 
       // console.log(XDOM.select('#gameArea'));
-      console.log(XDOM.select('#gameArea .player1 p'));
+      // console.log(XDOM.select('#gameArea .player1 p'));
       // XDOM.select('#gameArea .player1 div').addClass('red');
 
       // console.log('#gameArea .player1 p', XDOM.select('#gameArea .player1 p'));
+      console.log('div#gameArea div.player1 .inner', XDOM.select('div#gameArea div.player1 .inner').elements);
 
       // XDOM.fetch(
       //   {
