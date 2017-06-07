@@ -29,6 +29,16 @@
 
       var XDOM = {
         select: function (selector) {
+          var hasClass = function(node, className) {
+            var classes = node.getAttribute('class');
+            if (classes !== null) {
+              classesArray = classes.split(' ');
+              return classesArray.includes(className) ? true : false;
+            } else {
+              return false;
+            }
+          };
+
           var selectors = selector.split(' ');
 
           var elements = [];
@@ -110,9 +120,13 @@
           return {
             elements: elements,
             addClass: function (className) {
-              this.elements.forEach(function (e) {
-                e.className += e.className.length ? (" " + className) : className;
-              });
+              if (this.elements !== null && this.elements.length > 0) {
+                this.elements.forEach(function (e) {
+                  e.className += e.className.length
+                    ? (" " + className)
+                    : className;
+                });
+              }
             },
             removeClass: function (className) {
               // Implement
@@ -121,6 +135,15 @@
             hasClass: function (className) {
               // Implement
               // PAY Attention that "red" and "redmond" classes are not the same.
+              if (this.elements !== null && this.elements.length > 0) {
+                var hasClassName = false;
+                this.elements.forEach((e) => {
+                  if (hasClass(e, className)) {
+                    hasClassName = true;
+                  }
+                });
+                return hasClassName;
+              }
             },
             toggleClass: function (className) {
               // Implement
@@ -223,7 +246,8 @@
       // XDOM.select('#gameArea .player1 div').addClass('red');
 
       // console.log('#gameArea .player1 p', XDOM.select('#gameArea .player1 p'));
-      console.log('div#gameArea div.player1 .inner', XDOM.select('div#gameArea div.player1 .inner').elements);
+      // console.log('div#gameArea div.player1 .inner', XDOM.select('div#gameArea div.player1 .inner').elements);
+      console.log('has class ', XDOM.select('div#gameArea div.player1 .inner').hasClass('inner'));
 
       // XDOM.fetch(
       //   {
